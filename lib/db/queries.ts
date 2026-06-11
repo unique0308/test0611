@@ -47,7 +47,7 @@ export async function userExists(userId: string): Promise<boolean> {
     .select("id")
     .eq("id", userId)
     .maybeSingle();
-  if (error) return false;
+  if (error) throw error;
   return Boolean(data);
 }
 

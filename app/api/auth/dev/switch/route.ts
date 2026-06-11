@@ -22,7 +22,13 @@ export async function POST(req: NextRequest) {
     return new NextResponse("invalid user_id", { status: 400 });
   }
 
-  const exists = await userExists(userId);
+  let exists: boolean;
+  try {
+    exists = await userExists(userId);
+  } catch (e) {
+    const message = (e as Error)?.message ?? String(e);
+    return new NextResponse(`database error: ${message}`, { status: 500 });
+  }
   if (!exists) {
     return new NextResponse("user not found", { status: 404 });
   }
