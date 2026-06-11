@@ -1,0 +1,52 @@
+# Nginx 反代配置模板 — 部署时改 server_name + 复制到 /etc/nginx/sites-available/ai-platform
+# certbot 跑过后会自动加 ssl_* 行
+
+server {
+    listen 80;
+    server_name ai-mvp.company.com;        # 替换为真实域名
+
+    # 直接跳 HTTPS(certbot 跑完后会自动注入)
+    location / { return 301 https://$host$request_uri; }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ai-mvp.company.com;
+
+    # certbot 写入 begin
+    # ssl_certificate     /etc/letsencrypt/live/ai-mvp.company.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/ai-mvp.company.com/privkey.pem;
+    # certbot 写入 end
+
+    # 上传 / 视频生成的最大 body
+    client_max_body_size 50M;
+
+    # Next.js 反代
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 视频轮询可能较长,把 read timeout 调到 5 分钟
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+
+    # 静态资源 long cache(Next.js 自带 hash 路径)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_cache_valid 200 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # 健康检查可选
+    # location /healthz {
+    #     access_log off;
+    #     return 200 "ok\n";
+    # }
+}

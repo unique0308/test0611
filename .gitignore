@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+build/
+next-env.d.ts
+
+# env (绝不提交真实 secret)
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# system
+.DS_Store
+*.pem
+
+# editor
+.vscode/
+.idea/
+.swp
+*~
+
+# typescript
+*.tsbuildinfo
+
+# mock 本地存储(STORAGE_MODE=local 时生成的文件)
+uploads/
+
+# temporary local files
+tmp/
+
+# 本地 npm cache(绕开用户全局 cache 权限问题,Day 1 临时方案)
+.npm-cache/
+
+# coverage / tests
+coverage/
+.nyc_output/
