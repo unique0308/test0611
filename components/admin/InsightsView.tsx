@@ -919,6 +919,21 @@ function InsightRow({
               建议：{insight.suggestion}
             </div>
           )}
+          {insight.impact && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--text-2)",
+                marginBottom: 10,
+                padding: "8px 10px",
+                background: "var(--accent-soft)",
+                borderRadius: 6,
+                borderLeft: "2px solid var(--accent)"
+              }}
+            >
+              影响估算：{insight.impact}
+            </div>
+          )}
 
           {/* 非 active 状态：显示操作历史（who/when/note） */}
           {insight.status !== "active" && <ActionHistoryRow insightKey={insight.key} />}

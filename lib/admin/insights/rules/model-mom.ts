@@ -50,7 +50,8 @@ export async function runModelMom(): Promise<Insight[]> {
         evidence: [
           { label: "查看用量分析", href: `/admin?focus=credit#models` }
         ],
-        suggestion: "确认新模型质量后纳入长期供应，或评估是否替代某个旧模型",
+        impact: "新增模型如果持续放量，会影响后续采购组合和供应稳定性；提前观察可避免续订时缺少依据。",
+        suggestion: "确认新模型质量和稳定性后，再评估是否纳入长期供应或替代旧模型",
         status: "active",
         dept_id: null,
         dept_name: null,
@@ -77,7 +78,8 @@ export async function runModelMom(): Promise<Insight[]> {
           { label: "环比", value: `+${Math.round(momPct)}%` }
         ],
         evidence: [{ label: "查看用量分析", href: `/admin?focus=credit#models` }],
-        suggestion: "续订前对比同类模型单价，或评估是否需限量",
+        impact: `若该趋势持续，${m.model_name} 会成为本月模型成本增长的主要来源之一。`,
+        suggestion: "续订前对比同类模型单价，并评估是否需要设置使用引导或限量",
         status: "active",
         dept_id: null,
         dept_name: null,
@@ -97,7 +99,8 @@ export async function runModelMom(): Promise<Insight[]> {
           { label: "环比", value: `${Math.round(momPct)}%` }
         ],
         evidence: [{ label: "查看用量分析", href: `/admin?focus=credit#models` }],
-        suggestion: "评估是否下架释放配额，或与 provider 谈降价",
+        impact: "如果跌幅来自质量或体验问题，继续保留默认入口会降低使用效率；如果只是业务周期变化，可暂时观察。",
+        suggestion: "先确认跌幅原因，再评估是否下架、降级入口或与 provider 谈价",
         status: "active",
         dept_id: null,
         dept_name: null,

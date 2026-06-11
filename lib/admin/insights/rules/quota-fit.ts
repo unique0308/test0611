@@ -50,6 +50,7 @@ export async function runQuotaFit(): Promise<Insight[]> {
         { label: "查看部门看板", href: `/admin?focus=dept&dept=${q.department_id}` },
         { label: "调整配额", href: `/manage?tab=quota` }
       ],
+      impact: `若长期保持低使用率，${q.department_name} 的配额会占用预算空间，降低紧张部门的调配弹性。`,
       suggestion: "下月评估时可考虑下调配额，把额度匀给紧张的部门",
       status: "active",
       dept_id: q.department_id,

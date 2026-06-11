@@ -3,7 +3,7 @@
 // 每次访问实时跑全部规则 → 与 insight_actions LEFT JOIN → 返回带 status 的 InsightGroup[]
 
 import { CATEGORY_LABEL, type Insight, type InsightCategory, type InsightGroup } from "./types";
-import { getActionMap } from "./actions";
+import { getActionMap, type InsightAction } from "./actions";
 import { runQuotaForecast } from "./rules/quota-forecast";
 import { runModelMom } from "./rules/model-mom";
 import { runUserSpike } from "./rules/user-spike";
@@ -31,22 +31,44 @@ export type ComputeResult = {
   activeSignalCount: number;
   /** alert 中紧急的子集（admin 真正要立即处理的） */
   urgentAlerts: Insight[];
+  /** 本次计算失败的规则名；仅用于调试/审计，不阻断页面展示 */
+  failedRules: string[];
 };
 
 export async function computeInsights(): Promise<ComputeResult> {
-  // 并行跑全部规则
-  const ruleResults = await Promise.all([
-    runQuotaForecast(),
-    runModelMom(),
-    runUserSpike(),
-    runQuotaFit(),
-    runTagCoverage()
-  ]);
-  const candidates: Insight[] = ruleResults.flat();
+  const rules: Array<{ name: string; run: () => Promise<Insight[]> }> = [
+    { name: "quota-forecast", run: runQuotaForecast },
+    { name: "model-mom", run: runModelMom },
+    { name: "user-spike", run: runUserSpike },
+    { name: "quota-fit", run: runQuotaFit },
+    { name: "tag-coverage", run: runTagCoverage }
+  ];
+
+  const settled = await Promise.allSettled(rules.map((r) => r.run()));
+  const failedRules: string[] = [];
+  const candidates: Insight[] = [];
+  settled.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      candidates.push(...result.value);
+      return;
+    }
+    failedRules.push(rules[index].name);
+    // 不让单条规则拖垮整个洞察页；真实错误留在服务端日志。
+    // eslint-disable-next-line no-console
+    console.error(`[admin:insights] rule failed: ${rules[index].name}`, result.reason);
+  });
 
   // LEFT JOIN insight_actions，给每条洞察打 status
   const keys = candidates.map((c) => c.key);
-  const actionMap = await getActionMap(keys);
+  let actionMap = new Map<string, InsightAction>();
+  try {
+    actionMap = await getActionMap(keys);
+  } catch (e) {
+    // actions 失败只影响忽略/已处理状态，不能让洞察主体消失。
+    failedRules.push("insight-actions");
+    // eslint-disable-next-line no-console
+    console.error("[admin:insights] action map failed", e);
+  }
   const insights: Insight[] = candidates.map((c) => {
     const a = actionMap.get(c.key);
     return { ...c, status: a ? a.action_type : "active" };
@@ -84,6 +106,7 @@ export async function computeInsights(): Promise<ComputeResult> {
     activeCount,
     activeAlertCount,
     activeSignalCount,
-    activeByCategory
+    activeByCategory,
+    failedRules
   };
 }

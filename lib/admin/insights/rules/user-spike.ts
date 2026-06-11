@@ -108,8 +108,8 @@ export async function runUserSpike(): Promise<Insight[]> {
       category: "user",
       kind: "signal",
       severity: c.ratio >= 5 || c.prev_credits === 0 ? "urgent" : "normal",
-      title: `${u.name}${u.dept_name ? `（${u.dept_name}）` : ""} 本周用量${c.prev_credits === 0 ? "新激活并显著消耗" : `异常增长（${ratioLabel}）`}`,
-      body: `本周 ${c.this_credits.toLocaleString()} 积分，上周 ${c.prev_credits.toLocaleString()} 积分。建议确认是否为业务高峰或异常使用。`,
+      title: `${u.name}${u.dept_name ? `（${u.dept_name}）` : ""} 本周用量${c.prev_credits === 0 ? "新激活并产生较高消耗" : `明显增长（${ratioLabel}）`}`,
+      body: `本周 ${c.this_credits.toLocaleString()} 积分，上周 ${c.prev_credits.toLocaleString()} 积分。建议先确认是否对应真实业务高峰，再决定是否跟进。`,
       metrics: [
         { label: "本周积分", value: c.this_credits.toLocaleString() },
         { label: "上周积分", value: c.prev_credits.toLocaleString() },
@@ -118,7 +118,8 @@ export async function runUserSpike(): Promise<Insight[]> {
       evidence: u.dept_id
         ? [{ label: "查看部门成员", href: `/admin?focus=dept&dept=${u.dept_id}#members` }]
         : [],
-      suggestion: "如确认业务必要可忽略；若疑似异常，与该员工或部门负责人核对",
+      impact: `若这是计划外消耗，可能影响 ${u.dept_name ?? "所在部门"} 本月剩余配额；若是业务高峰，可作为后续配额评估依据。`,
+      suggestion: "如确认业务必要可忽略；如无法对应明确项目，与该员工或部门负责人核对",
       status: "active",
       dept_id: u.dept_id ?? null,
       dept_name: u.dept_name ?? null

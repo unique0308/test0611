@@ -60,10 +60,11 @@ export async function runQuotaForecast(): Promise<Insight[]> {
         { label: "查看部门看板", href: `/admin?dept=${q.department_id}` },
         { label: "调整配额", href: `/manage?tab=quota` }
       ],
+      impact: `若不提前处理，预计月末会多出 ${Math.round(overshoot).toLocaleString()} 积分需求，可能导致月底集中追加配额或压缩必要生成。`,
       suggestion:
         overshootRatio >= 0.3
-          ? `建议立即与 ${q.department_name} 负责人沟通：调高配额或限制非必要生成`
-          : `建议提前在月内主动调高 ${q.department_name} 配额，避免月末紧急冲单`,
+          ? `建议优先与 ${q.department_name} 负责人核对本月业务高峰，并评估是否上调配额或收敛非必要生成`
+          : `建议在月内提前评估 ${q.department_name} 配额，避免月底集中处理`,
       status: "active", // index.ts 会按 insight_actions 覆写
       dept_id: q.department_id,
       dept_name: q.department_name,

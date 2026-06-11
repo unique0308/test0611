@@ -43,6 +43,8 @@ export type Insight = {
   evidence: InsightEvidenceLink[];
   /** 推荐动作的一句话（不强制要做，admin 自己判断） */
   suggestion?: string;
+  /** 影响估算：说明如果不处理，可能影响哪类成本、预算、数据质量或协作效率 */
+  impact?: string;
   /** 状态：active / ignored / actioned */
   status: InsightStatus;
   /** 归属部门 id（null = 跨部门信号，如 model-mom） */

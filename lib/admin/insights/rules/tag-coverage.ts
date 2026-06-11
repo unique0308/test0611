@@ -50,6 +50,7 @@ export async function runTagCoverage(): Promise<Insight[]> {
         { label: "查看用途分布", href: `/admin?focus=credit#purposes` },
         { label: "查看用途标签", href: `/manage?tab=purposes` }
       ],
+      impact: "用途标签覆盖率过低会让场景分布、部门需求和模型采购判断失真，后续很难解释预算为什么增长。",
       suggestion:
         uncategorizedPct >= 0.9
           ? "建议检查生成页 prompt 区是否把用途选择放得太深；考虑在 V2 改为必填或加引导"
